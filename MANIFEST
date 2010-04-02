@@ -1,0 +1,13 @@
+Build.PL
+examples/show-my-taskstats.pl
+lib/IO/Socket/Netlink/Taskstats.pm
+lib/Socket/Netlink/Taskstats.pm
+lib/Socket/Netlink/Taskstats_const.pm.PL
+MANIFEST			This list of files
+t/00use.t
+t/01self.t
+t/99pod.t
+Makefile.PL
+README
+LICENSE
+META.yml
