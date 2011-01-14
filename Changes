@@ -1,0 +1,7 @@
+Revision history for Socket-Netlink-Taskstats
+
+0.02    CHANGES:
+         * Declare configure_requires ExtUtils::CChecker
+
+0.01    First version, released on an unsuspecting world.
+

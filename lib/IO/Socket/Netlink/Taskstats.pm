@@ -1,7 +1,7 @@
 #  You may distribute under the terms of either the GNU General Public License
 #  or the Artistic License (the same terms as Perl itself)
 #
-#  (C) Paul Evans, 2010 -- leonerd@leonerd.org.uk
+#  (C) Paul Evans, 2010-2011 -- leonerd@leonerd.org.uk
 
 package IO::Socket::Netlink::Taskstats;
 
@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket::Netlink::Generic );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp;
 
@@ -44,9 +44,8 @@ of resource usage on a per-process basis, and notification of resources used
 by processes at the time they exit.
 
 This module is currently a work-in-progress, and this documentation is fairly
-minimal. The reader is expected to be familiar with C<Taskstats>, as it
-currently only gives a fairly minimal description of the Perl-level wrapping
-of the kernel level concepts.
+minimal. The reader is expected to be familiar with C<Taskstats>, only a
+fairly minimal descriptio of the Perl-level wrapping is given here.
 
 =cut
 
