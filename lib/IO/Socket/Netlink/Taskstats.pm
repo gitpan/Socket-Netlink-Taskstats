@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use base qw( IO::Socket::Netlink::Generic );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Carp;
 
@@ -45,7 +45,7 @@ by processes at the time they exit.
 
 This module is currently a work-in-progress, and this documentation is fairly
 minimal. The reader is expected to be familiar with C<Taskstats>, only a
-fairly minimal descriptio of the Perl-level wrapping is given here.
+fairly minimal description of the Perl-level wrapping is given here.
 
 =cut
 
@@ -58,14 +58,17 @@ sub message_class
    return "IO::Socket::Netlink::Taskstats::_Message";
 }
 
+sub command_class
+{
+   return "IO::Socket::Netlink::Taskstats::_Command";
+}
+
 sub _get_process_info
 {
    my $self = shift;
    my %searchattrs = @_;
 
-   $self->send_nlmsg( $self->new_message(
-      nlmsg_flags => NLM_F_REQUEST,
-
+   $self->send_nlmsg( $self->new_command(
       cmd => CMD_GET,
       nlattrs => \%searchattrs,
    ) ) or croak "Cannot send - $!";
@@ -88,6 +91,49 @@ sub get_process_info_by_pid
    my $self = shift;
    my ( $pid ) = @_;
    return $self->_get_process_info( pid => $pid )->{aggr_pid}{stats};
+}
+
+=head2 $sock->register_cpumask( $mask )
+
+=head2 $sock->deregister_cpumask( $mask )
+
+Register or deregister this socket to receive process exit notifications, for
+processes exiting on CPUs given by the C<$mask>.
+
+=cut
+
+sub register_cpumask
+{
+   my $self = shift;
+   my ( $mask ) = @_;
+
+   $self->send_nlmsg( $self->new_command(
+      cmd => CMD_GET,
+      nlattrs => { 
+         register_cpumask => $mask,
+      },
+   ) );
+
+   $self->recv_nlmsg( my $message, 32768 ) or
+      croak "Cannot recv - $!";
+   ( $! = $message->nlerr_error ) and croak "Received NLMSG_ERROR - $!";
+}
+
+sub deregister_cpumask
+{
+   my $self = shift;
+   my ( $mask ) = @_;
+
+   $self->send_nlmsg( $self->new_command(
+      cmd => CMD_GET,
+      nlattrs => { 
+         deregister_cpumask => $mask,
+      },
+   ) );
+
+   $self->recv_nlmsg( my $message, 32768 ) or
+      croak "Cannot recv - $!";
+   ( $! = $message->nlerr_error ) and croak "Received NLMSG_ERROR - $!";
 }
 
 =head1 MESSAGE OBJECTS
@@ -132,10 +178,19 @@ __PACKAGE__->has_nlattrs(
 sub   pack_nlattr_stats {   pack_taskstats $_[1] }
 sub unpack_nlattr_stats { unpack_taskstats $_[1] }
 
-# Keep perl happy; keep Britain tidy
-1;
+package IO::Socket::Netlink::Taskstats::_Command;
 
-__END__
+use base qw( IO::Socket::Netlink::Generic::_Message );
+
+use Socket::Netlink::Taskstats qw( :DEFAULT );
+
+__PACKAGE__->has_nlattrs(
+   "genlmsg",
+   pid                => [ CMD_ATTR_PID,                "u32" ],
+   tgid               => [ CMD_ATTR_TGID,               "u32" ],
+   register_cpumask   => [ CMD_ATTR_REGISTER_CPUMASK,   "raw" ],
+   deregister_cpumask => [ CMD_ATTR_DEREGISTER_CPUMASK, "raw" ],
+);
 
 =head1 SEE ALSO
 
@@ -155,3 +210,7 @@ L<IO::Socket::Netlink> - Object interface to C<AF_NETLINK> domain sockets
 =head1 AUTHOR
 
 Paul Evans <leonerd@leonerd.org.uk>
+
+=cut
+
+0x55AA;

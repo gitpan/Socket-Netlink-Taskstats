@@ -38,7 +38,8 @@ EOF
 my $build = $cc->new_module_build(
    module_name => 'Socket::Netlink::Taskstats',
    requires => {
-      'Socket::Netlink' => 0,
+      'Exporter' => '5.57',
+      'Socket::Netlink' => '0.04',
    },
    configure_requires => {
       'ExtUtils::CChecker' => '0.02',
